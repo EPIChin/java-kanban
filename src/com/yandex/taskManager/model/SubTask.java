@@ -1,4 +1,6 @@
-import java.util.List;
+package com.yandex.taskManager.model;
+
+
 
 public class SubTask extends Task {
     public Integer getEpicId() {
@@ -19,27 +21,6 @@ public class SubTask extends Task {
 
     public void setEpicId(Integer epicId) {
         this.epicId = epicId;
-    }
-
-    public static Status checkStatusEpic(SubTask subTask) {
-        int EpicId = subTask.getEpicId();
-
-        if (MenegerTask.epics.get(EpicId).getIdSubTasks().isEmpty() || isStatus(MenegerTask.epics.get(EpicId).getIdSubTasks(), Status.NEW)) {
-            return Status.NEW;
-        } else if (isStatus(MenegerTask.epics.get(EpicId).getIdSubTasks(), Status.DONE)) {
-            return Status.DONE;
-        } else {
-            return Status.IN_PROGRESS;
-        }
-    }
-
-    private static boolean isStatus(List<Integer> tasks, Status status) {
-        for (Integer task : tasks) {
-            if (MenegerTask.subTasks.get(task).getStatus() == status) {
-                return true;
-            }
-        }
-        return false;
     }
 
     @Override

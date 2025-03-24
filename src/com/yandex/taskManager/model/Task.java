@@ -1,3 +1,5 @@
+package com.yandex.taskManager.model;
+
 public class Task {
     private int id;
     private String name;
@@ -21,9 +23,7 @@ public class Task {
         this.name = name;
         this.description = description;
         this.status = status;
-
     }
-
 
     public String getName() {
         return name;
