@@ -36,16 +36,16 @@ public class  ManagerTask {
         updateEpics(epic);
     }
 
-    public HashMap<Integer, Task> getTasks() {
-        return tasks;
+    public ArrayList<Task> getTasks() {
+        return new ArrayList<>(tasks.values());
     }
 
-    public HashMap<Integer, Epic> getEpics() {
-        return epics;
+    public ArrayList<Epic> getEpics() {
+        return new ArrayList<>(epics.values());
     }
 
-    public HashMap<Integer, SubTask> getSubTasks() {
-        return subTasks;
+    public ArrayList<SubTask> getSubTasks() {
+        return new ArrayList<>(subTasks.values());
     }
 
     public void deleteTask() {
@@ -112,10 +112,10 @@ public class  ManagerTask {
         subTasks.remove(id);
     }
 
-    public SequencedCollection<Task> getAllSubtasksOfEpic(int id) {
+    public ArrayList<Task> getAllSubtasksOfEpic(int id) {
         epics.get(id);
         Epic epic = epics.get(id);
-        List<Task> idSubTasks = new ArrayList<>();
+        ArrayList<Task> idSubTasks = new ArrayList<>();
         for (int i : epic.getIdSubTasks()) {
             idSubTasks.add(getSubTaskById(i));
         }
