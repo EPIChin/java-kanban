@@ -1,4 +1,4 @@
-package com.yandex.taskManager.test;
+package test;
 
 import com.yandex.taskManager.model.Epic;
 import com.yandex.taskManager.model.Status;
@@ -11,7 +11,8 @@ import org.junit.jupiter.api.Test;
 
 import java.util.List;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 
 class TaskManagerTest {
     protected final TaskManager taskManager = Managers.getDefault();

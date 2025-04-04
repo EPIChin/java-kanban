@@ -14,8 +14,12 @@ public class Epic extends Task {
         return idSubTasksCopy;
     }
 
-    public void setIdSubTasks(int idSubTask) {
+    public void addSubTaskId(int idSubTask) {
         idSubTasks.add(idSubTask);
+    }
+
+    public void removeSubTaskId(int idSubTask) {
+        idSubTasks.remove(idSubTask);
     }
 
     public Epic(String name, String description) {

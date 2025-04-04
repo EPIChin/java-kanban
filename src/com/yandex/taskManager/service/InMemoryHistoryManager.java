@@ -25,9 +25,4 @@ public class InMemoryHistoryManager implements HistoryManager {
             history.add(task);
         }
     }
-
-
-
-
-
 }

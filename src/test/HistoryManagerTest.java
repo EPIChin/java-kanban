@@ -1,4 +1,4 @@
-package com.yandex.taskManager.test;
+package test;
 
 import com.yandex.taskManager.model.Task;
 import com.yandex.taskManager.service.HistoryManager;
@@ -7,7 +7,8 @@ import org.junit.jupiter.api.Test;
 
 import java.util.List;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 
 class HistoryManagerTest {
 
