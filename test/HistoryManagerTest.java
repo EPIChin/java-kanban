@@ -1,5 +1,3 @@
-package test;
-
 import com.yandex.taskManager.model.Epic;
 import com.yandex.taskManager.model.Status;
 import com.yandex.taskManager.model.SubTask;
