@@ -147,11 +147,11 @@ public class InMemoryTaskManager implements TaskManager {
 
     @Override
     public Status checkStatusEpic(SubTask subTask) {
-        int EpicId = subTask.getEpicId();
+        int epicId = subTask.getEpicId();
 
-        if (epics.get(EpicId).getIdSubTasks().isEmpty() || compareStatus(epics.get(EpicId).getIdSubTasks(), Status.NEW)) {
+        if (epics.get(epicId).getIdSubTasks().isEmpty() || compareStatus(epics.get(epicId).getIdSubTasks(), Status.NEW)) {
             return Status.NEW;
-        } else if (compareStatus(epics.get(EpicId).getIdSubTasks(), Status.DONE)) {
+        } else if (compareStatus(epics.get(epicId).getIdSubTasks(), Status.DONE)) {
             return Status.DONE;
         } else {
             return Status.IN_PROGRESS;
