@@ -1,4 +1,5 @@
 package test;
+
 import com.yandex.taskManager.model.Epic;
 import com.yandex.taskManager.model.Status;
 import com.yandex.taskManager.model.SubTask;
@@ -6,8 +7,10 @@ import com.yandex.taskManager.model.Task;
 import com.yandex.taskManager.service.HistoryManager;
 import com.yandex.taskManager.service.InMemoryHistoryManager;
 import org.junit.jupiter.api.Test;
+
 import java.util.Collections;
 import java.util.List;
+
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 
@@ -37,7 +40,7 @@ class HistoryManagerTest {
 
 
     @Test
-    public void AddTasksToHistoryAndNotDuplicate() {
+    public void addTasksToHistoryAndNotDuplicate() {
         Task task1 = createTask();
         Task task2 = createTask();
         Task task3 = createTask();
@@ -48,7 +51,7 @@ class HistoryManagerTest {
     }
 
     @Test
-    public void AddEpicsToHistoryAndNotDuplicate() {
+    public void addEpicsToHistoryAndNotDuplicate() {
         Epic epic1 = createEpic();
         Epic epic2 = createEpic();
         Epic epic3 = createEpic();
@@ -59,17 +62,17 @@ class HistoryManagerTest {
     }
 
     @Test
-    public void AddSubTaskAndSubTaskToHistory() {
+    public void addSubTaskAndSubTaskToHistory() {
         Epic epic = createEpic();
         SubTask subTask = createSubTask(0);
         subTask.setId(1);
         historyManager.add(epic);
         historyManager.add(subTask);
-        assertEquals(List.of(epic,subTask), historyManager.getHistory());
+        assertEquals(List.of(epic, subTask), historyManager.getHistory());
     }
 
     @Test
-    public void RemoveOnlyOneTask() {
+    public void removeOnlyOneTask() {
         Task task = createTask();
         historyManager.add(task);
         historyManager.remove(task.getId());
