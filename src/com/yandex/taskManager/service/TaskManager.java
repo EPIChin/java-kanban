@@ -50,5 +50,7 @@ public interface TaskManager {
 
     Status checkStatusEpic(SubTask subTask);
 
+    void deleteAll();
+
     List<Task> getHistory();
 }

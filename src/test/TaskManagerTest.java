@@ -8,14 +8,25 @@ import com.yandex.taskManager.service.InMemoryTaskManager;
 import com.yandex.taskManager.service.Managers;
 import com.yandex.taskManager.service.TaskManager;
 import org.junit.jupiter.api.Test;
-
+import java.util.Collections;
 import java.util.List;
-
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 
 class TaskManagerTest {
     protected final TaskManager taskManager = Managers.getDefault();
+
+    protected Task createTask() {
+        return new Task("TaskName", "TaskDescription", Status.NEW);
+    }
+
+    protected Epic createEpic() {
+        return new Epic("EpicName", "EpicDescription");
+    }
+
+    protected SubTask createSubTask(int epicId) {
+        return new SubTask("Прочитать", "Книгу", Status.DONE, epicId);
+    }
 
     @Test
     void addNewTask() {
@@ -83,5 +94,54 @@ class TaskManagerTest {
         final Task savedTaskDefault = defaultTaskManager.getTaskById(0);
 
         assertEquals( savedTask1, savedTaskDefault, "Задачи не совпадают.");
+    }
+    @Test
+    public void UpdateTaskStatusToInProgress() {
+        Task task = createTask();
+        task.setStatus(Status.IN_PROGRESS);
+        taskManager.updateTask(task);
+        assertEquals(Status.IN_PROGRESS, taskManager.getTaskById(task.getId()).getStatus());
+    }
+
+    @Test
+    public void UpdateEpicStatusToInProgress() {
+        Epic epic = createEpic();
+        epic.setStatus(Status.IN_PROGRESS);
+        taskManager.updateTask(epic);
+        assertEquals(Status.IN_PROGRESS, taskManager.getTaskById(epic.getId()).getStatus());
+    }
+
+    @Test
+    public void DeleteAll(){
+        Task task = createTask();
+        Epic epic = createEpic();
+        SubTask subTask = createSubTask(1);
+        taskManager.addTask(task);
+        taskManager.addEpic(epic);
+        taskManager.addSubTask(subTask);
+        taskManager.deleteAll();
+        assertEquals(Collections.emptyList(), taskManager.getTasks());
+        assertEquals(Collections.emptyList(), taskManager.getEpics());
+        assertEquals(Collections.emptyList(), taskManager.getSubTasks());
+    }
+
+    @Test
+    public void DeleteTaskById() {
+        Task task = createTask();
+        taskManager.deleteTask(task.getId());
+        assertEquals(Collections.emptyList(), taskManager.getTasks());
+    }
+
+    @Test
+    public void SubtasksNotShouldStoreOldId() {
+        Epic epic = createEpic();
+        SubTask subTask = createSubTask(0);
+        SubTask subTask2 = createSubTask(0);
+        taskManager.addEpic(epic);
+        taskManager.addSubTask(subTask);
+        taskManager.addSubTask(subTask2);
+        taskManager.deleteSubTask(subTask.getId());
+        assertEquals(taskManager.getAllSubtasksOfEpic(0), taskManager.getSubTasks());
+
     }
 }

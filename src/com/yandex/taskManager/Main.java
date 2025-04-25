@@ -6,7 +6,6 @@ import com.yandex.taskManager.model.SubTask;
 import com.yandex.taskManager.model.Task;
 import com.yandex.taskManager.service.InMemoryTaskManager;
 
-
 public class Main {
     public static void main(String[] args) {
         System.out.println("Поехали!");
