@@ -38,7 +38,7 @@ public class InMemoryHistoryManager implements HistoryManager {
 
     private static class CustomLinkedList {
         private final Map<Integer, Node> nodeMap = new HashMap<>();
-        private Node head; //когда мы используем статические переменные head и tail, они становятся общими для всех тестов и сохраняют своё состояние между ними. Это приводит к тому, что тесты влияют друг на друга, нарушая принцип изоляции тестов.
+        private Node head;
         private Node tail;
 
         private void linkLast(Task task) {
