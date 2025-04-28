@@ -14,7 +14,7 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 
 class HistoryManagerTest {
 
-    private final HistoryManager historyManager = new InMemoryHistoryManager();
+    HistoryManager historyManager = new InMemoryHistoryManager();
 
     @Test
     void historyManagerAdd() {
