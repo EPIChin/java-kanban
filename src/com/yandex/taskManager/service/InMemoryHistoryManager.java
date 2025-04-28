@@ -14,6 +14,9 @@ public class InMemoryHistoryManager implements HistoryManager {
 
     @Override
     public void add(Task task) {
+        if (task == null) {
+            throw new IllegalArgumentException("Task cannot be null");
+        }
         historiesList.linkLast(task);
     }
 
@@ -25,7 +28,7 @@ public class InMemoryHistoryManager implements HistoryManager {
     @Override
     public List<Task> getHistory() {
         List<Task> taskList = new ArrayList<>();
-        Node element = historiesList.head;
+        Node element = historiesList.getHead();
         while (element != null) {
             taskList.add(element.getTask());
             element = element.getNext();
@@ -35,8 +38,8 @@ public class InMemoryHistoryManager implements HistoryManager {
 
     private static class CustomLinkedList {
         private final Map<Integer, Node> nodeMap = new HashMap<>();
-        private Node head;
-        private Node tail;
+        private static Node head;
+        private static Node tail;
 
         private void linkLast(Task task) {
             Node element = new Node();
@@ -76,15 +79,21 @@ public class InMemoryHistoryManager implements HistoryManager {
                 if (next != null) {
                     next.setPrev(prev);
                 }
+                node.prev = null;
+                node.next = null;
             }
         }
 
         private Node getNode(int id) {
             return nodeMap.get(id);
         }
+
+        public Node getHead() {
+            return head;
+        }
     }
 
-    static class Node {
+    private static class Node {
         private Task task;
         private Node prev;
         private Node next;
