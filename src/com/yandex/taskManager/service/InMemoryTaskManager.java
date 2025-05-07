@@ -18,7 +18,7 @@ public class InMemoryTaskManager implements TaskManager {
     protected final HistoryManager historyManager = Managers.getDefaultHistory();
 
     @Override
-    public  void addTask(Task task) {
+    public void addTask(Task task) {
         tasks.put(id++, task);
     }
 
@@ -30,10 +30,11 @@ public class InMemoryTaskManager implements TaskManager {
     @Override
     public void addSubTask(SubTask subTask) {
         Epic epic = epics.get(subTask.getEpicId());
-        epic.addSubTaskId(id);
+        epic.setIdSubTasks(id);
         epics.put(subTask.getEpicId(), epic);
         subTasks.put(id++, subTask);
 
+        epic.setStatus(checkStatusEpic(subTask));
         epic.setStatus(checkStatusEpic(subTask));
         epic.setId(subTask.getEpicId());
         updateEpics(epic);
@@ -130,11 +131,6 @@ public class InMemoryTaskManager implements TaskManager {
 
     @Override
     public void deleteSubTask(int id) {
-        Epic epic = epics.get(subTasks.get(id).getEpicId());
-        epic.removeSubTaskId(id);
-
-        epic.setStatus(checkStatusEpic(subTasks.get(id)));
-        updateEpics(epic);
         subTasks.remove(id);
     }
 
@@ -151,11 +147,11 @@ public class InMemoryTaskManager implements TaskManager {
 
     @Override
     public Status checkStatusEpic(SubTask subTask) {
-        int EpicId = subTask.getEpicId();
+        int epicId = subTask.getEpicId();
 
-        if (epics.get(EpicId).getIdSubTasks().isEmpty() || compareStatus(epics.get(EpicId).getIdSubTasks(), Status.NEW)) {
+        if (epics.get(epicId).getIdSubTasks().isEmpty() || compareStatus(epics.get(epicId).getIdSubTasks(), Status.NEW)) {
             return Status.NEW;
-        } else if (compareStatus(epics.get(EpicId).getIdSubTasks(), Status.DONE)) {
+        } else if (compareStatus(epics.get(epicId).getIdSubTasks(), Status.DONE)) {
             return Status.DONE;
         } else {
             return Status.IN_PROGRESS;
@@ -172,7 +168,15 @@ public class InMemoryTaskManager implements TaskManager {
     }
 
     @Override
+    public void deleteAll() {
+        subTasks.clear();
+        epics.clear();
+        tasks.clear();
+    }
+
+    @Override
     public List<Task> getHistory() {
-        return  historyManager.getHistory();
+        return historyManager.getHistory();
     }
 }
+

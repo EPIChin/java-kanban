@@ -6,7 +6,6 @@ import com.yandex.taskManager.model.SubTask;
 import com.yandex.taskManager.model.Task;
 import com.yandex.taskManager.service.InMemoryTaskManager;
 
-
 public class Main {
     public static void main(String[] args) {
         System.out.println("Поехали!");
@@ -27,7 +26,7 @@ public class Main {
         System.out.println(manager.getEpics());
         System.out.println(manager.getSubTasks());
 
-        System.out.println("Задача "+manager.getTaskById(1));
+        System.out.println("Задача " + manager.getTaskById(1));
         System.out.println("Все задачи Эпики'2'" + manager.getAllSubtasksOfEpic(2));
 
         System.out.println("История:" + manager.getHistory());
