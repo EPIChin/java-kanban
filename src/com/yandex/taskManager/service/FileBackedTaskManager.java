@@ -48,33 +48,6 @@ public class FileBackedTaskManager extends InMemoryTaskManager implements TaskMa
         }
     }
 
-    private TaskType getType(Task task) {
-        if (task instanceof Epic) {
-            return TaskType.EPIC;
-        } else if (task instanceof SubTask) {
-            return TaskType.SUBTASK;
-        }
-        return TaskType.TASK;
-    }
-
-    private String toString(Task task) {
-        String[] arrayStringsCSV = {
-                Integer.toString(task.getId()),
-                getType(task).toString(),
-                task.getName(),
-                task.getStatus().toString(),
-                task.getDescription(),
-                getParentEpicId(task)};
-        return String.join(",", arrayStringsCSV);
-    }
-
-    private String getParentEpicId(Task task) {
-        if (task instanceof SubTask) {
-            return Integer.toString(((SubTask) task).getEpicId());
-        }
-        return "";
-    }
-
     public static FileBackedTaskManager loadFromFile(File file) {
         FileBackedTaskManager tasksManager = new FileBackedTaskManager(file);
         int idMax = 0;
