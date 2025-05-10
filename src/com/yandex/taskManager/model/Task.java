@@ -27,6 +27,56 @@ public class Task {
         this.status = status;
     }
 
+    public String toCsv() {
+        return String.format("%d,TASK,%s,%s,%s",
+                getId(),
+                getName(),
+                getStatus(),
+                getDescription()
+        );
+    }
+
+    public static Task fromCsv(String csvLine) {
+        String[] values = csvLine.split(",", -1);
+        for (int i = 0; i < values.length; i++) {
+            values[i] = values[i].trim().replaceAll("^\"\"", "");
+        }
+        TaskType type = TaskType.valueOf(values[1]);
+
+        switch (type) {
+            case EPIC:
+                Epic epic = new Epic(
+                        values[2],
+                        values[4],
+                        Status.valueOf(values[3])
+                );
+                epic.setId(Integer.parseInt(values[0]));
+                return epic;
+            case TASK:
+                Task task = new Task(
+                        values[2],
+                        values[4],
+                        Status.valueOf(values[3])
+                );
+                task.setId(Integer.parseInt(values[0]));
+                return task;
+            case SUBTASK:
+                SubTask subTask = new SubTask(
+                        values[2],
+                        values[4],
+                        Status.valueOf(values[3]),
+                        Integer.parseInt(values[5])
+                );
+                subTask.setId(Integer.parseInt(values[0]));
+                return subTask;
+        }
+        return null;
+    }
+
+    public TaskType getType() {
+        return TaskType.TASK;
+    }
+
     public String getName() {
         return name;
     }
@@ -83,4 +133,5 @@ public class Task {
     public int hashCode() {
         return Objects.hash(name, description, status);
     }
+
 }

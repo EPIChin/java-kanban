@@ -43,6 +43,5 @@ public class Main {
         FileBackedTaskManager loadFileBackedTaskManager = FileBackedTaskManager.loadFromFile(new File("data"));
         System.out.println("прочитано" + loadFileBackedTaskManager.getTasks());
 
-
     }
 }
