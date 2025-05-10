@@ -1,0 +1,4 @@
+id,type,name,status,description,epic
+1,TASK,починить машину,NEW,важно
+2,EPIC,Уборка!,NEW,пора,[]
+3,EPIC,Учеба,NEW,важно,[]
