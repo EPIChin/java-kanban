@@ -4,7 +4,6 @@ import com.yandex.taskManager.model.Epic;
 import com.yandex.taskManager.model.SubTask;
 import com.yandex.taskManager.model.Task;
 import com.yandex.taskManager.model.TaskType;
-import com.yandex.taskManager.model.Status;
 
 import java.io.*;
 import java.nio.charset.StandardCharsets;
@@ -112,7 +111,6 @@ public class FileBackedTaskManager extends InMemoryTaskManager implements TaskMa
         }
         return tasksManager;
     }
-
 
     private static <T extends Task> int getIdMax(List<T> tasks, int idMax) {
         for (T maxTask : tasks) {
