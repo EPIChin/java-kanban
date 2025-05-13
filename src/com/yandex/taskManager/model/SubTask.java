@@ -23,6 +23,22 @@ public class SubTask extends Task {
     }
 
     @Override
+    public String toCsv() {
+        return String.format("%d,SUBTASK,%s,%s,%s,%d",
+                getId(),
+                getName(),
+                getStatus(),
+                getDescription(),
+                getEpicId()
+        );
+    }
+
+    @Override
+    public TaskType getType() {
+        return TaskType.SUBTASK;
+    }
+
+    @Override
     public String toString() {
         return "SubTask{" +
                 "epicId=" + epicId +

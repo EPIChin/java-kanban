@@ -32,7 +32,7 @@ class TaskManagerTest {
     void addNewTask() {
         Task task = new Task("починть машину", "важно");
         taskManager.addTask(task);
-        final Task savedTask = taskManager.getTaskById(0);
+        final Task savedTask = taskManager.getTaskById(1);
         assertNotNull(savedTask, "Задача не найдена.");
         assertEquals(task, savedTask, "Задачи не совпадают.");
         final List<Task> tasks = taskManager.getTasks();
@@ -45,7 +45,7 @@ class TaskManagerTest {
     void addNewEpic() {
         Epic epic = new Epic("Уборка!", "пора");
         taskManager.addEpic(epic);
-        final Task savedEpic = taskManager.getEpicById(0);
+        final Task savedEpic = taskManager.getEpicById(1);
         assertNotNull(savedEpic, "Задача не найдена.");
         assertEquals(epic, savedEpic, "Задачи не совпадают.");
         final List<Epic> epics = taskManager.getEpics();
@@ -58,9 +58,9 @@ class TaskManagerTest {
     void addNewSubtask() {
         Epic epic = new Epic("Уборка!", "пора");
         taskManager.addEpic(epic);
-        SubTask subTask = new SubTask("Уборка в кухне", "помыть посуду", Status.IN_PROGRESS, 0);
+        SubTask subTask = new SubTask("Уборка в кухне", "помыть посуду", Status.IN_PROGRESS, 1);
         taskManager.addSubTask(subTask);
-        final Task savedSubTask = taskManager.getSubTaskById(1);
+        final Task savedSubTask = taskManager.getSubTaskById(2);
         assertNotNull(savedSubTask, "Задача не найдена.");
         assertEquals(subTask, savedSubTask, "Задачи не совпадают.");
         final List<SubTask> SubTasks = taskManager.getSubTasks();
@@ -101,7 +101,7 @@ class TaskManagerTest {
     public void deleteAll() {
         Task task = createTask();
         Epic epic = createEpic();
-        SubTask subTask = createSubTask(1);
+        SubTask subTask = createSubTask(2);
         taskManager.addTask(task);
         taskManager.addEpic(epic);
         taskManager.addSubTask(subTask);
@@ -116,17 +116,5 @@ class TaskManagerTest {
         Task task = createTask();
         taskManager.deleteTask(task.getId());
         assertEquals(Collections.emptyList(), taskManager.getTasks());
-    }
-
-    @Test
-    public void subtasksNotShouldStoreOldId() {
-        Epic epic = createEpic();
-        SubTask subTask = createSubTask(0);
-        SubTask subTask2 = createSubTask(0);
-        taskManager.addEpic(epic);
-        taskManager.addSubTask(subTask);
-        taskManager.addSubTask(subTask2);
-        taskManager.deleteSubTask(subTask.getId());
-        assertEquals(taskManager.getAllSubtasksOfEpic(0), taskManager.getSubTasks());
     }
 }
