@@ -12,7 +12,7 @@ import org.junit.jupiter.api.Test;
 import java.time.LocalDateTime;
 import java.util.List;
 
-import static org.testng.Assert.*;
+import static org.junit.jupiter.api.Assertions.*;
 
 
 abstract class TaskManagerTest<T extends TaskManager> {
@@ -34,7 +34,7 @@ abstract class TaskManagerTest<T extends TaskManager> {
     protected abstract T createTaskManager();
 
     @BeforeEach
-    public void setup() {
+    void setUp() {
         taskManager = createTaskManager();
         historyManager = new InMemoryHistoryManager();
 
@@ -42,7 +42,7 @@ abstract class TaskManagerTest<T extends TaskManager> {
     }
 
     @AfterEach
-    public void cleanup() {
+    void tearDown() {
         if (taskManager != null) {
             taskManager.deleteAll();
         }
@@ -72,7 +72,7 @@ abstract class TaskManagerTest<T extends TaskManager> {
     @Test
     public void shouldGetAllTasks() {
         Task task1 = createTask();
-        Task task2 = new Task("имя задачи", "описание", Status.NEW, LocalDateTime.now(), 3);
+        Task task2 = new Task("имя задачи", "описание", Status.NEW, LocalDateTime.now().minusHours(5), 3);
 
         taskManager.addTask(task1);
         taskManager.addTask(task2);
