@@ -6,6 +6,7 @@ import com.yandex.taskManager.service.FileBackedTaskManager;
 import org.junit.jupiter.api.*;
 
 import java.io.*;
+import java.time.LocalDateTime;
 
 public class FileBackedTaskManagerTest {
 
@@ -28,7 +29,7 @@ public class FileBackedTaskManagerTest {
     void createAndLoadTask() throws Exception {
         FileBackedTaskManager manager = new FileBackedTaskManager(tempFile);
 
-        Task task = new Task("Задача", "Описание", Status.NEW);
+        Task task = new Task("Задача", "Описание", Status.NEW, LocalDateTime.now(), 5);
         manager.addTask(task);
 
         FileBackedTaskManager loadedManager = FileBackedTaskManager.loadFromFile(tempFile);
@@ -48,8 +49,8 @@ public class FileBackedTaskManagerTest {
     void saveMultipleTasks() throws Exception {
         FileBackedTaskManager manager = new FileBackedTaskManager(tempFile);
 
-        Task task1 = new Task("Задача 1", "Описание 1", Status.NEW);
-        Task task2 = new Task("Задача 2", "Описание 2", Status.DONE);
+        Task task1 = new Task("Задача 1", "Описание 1", Status.NEW, LocalDateTime.now(), 5);
+        Task task2 = new Task("Задача 2", "Описание 2", Status.DONE, LocalDateTime.now().plusMinutes(200), 5);
         manager.addTask(task1);
         manager.addTask(task2);
 
@@ -79,7 +80,7 @@ public class FileBackedTaskManagerTest {
         Epic epic = new Epic("Эпик", "Описание эпика", Status.IN_PROGRESS);
         manager.addEpic(epic);
         SubTask subTask = new SubTask("Подзадача", "Описание подзадачи",
-                Status.NEW, epic.getId());
+                Status.NEW, LocalDateTime.now(), 5, epic.getId());
         manager.addSubTask(subTask);
 
         FileBackedTaskManager loadedManager = FileBackedTaskManager.loadFromFile(tempFile);
