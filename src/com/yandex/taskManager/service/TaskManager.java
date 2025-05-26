@@ -46,7 +46,7 @@ public interface TaskManager {
 
     void deleteSubTask(int id);
 
-    ArrayList<Task> getAllSubtasksOfEpic(int id);
+    ArrayList<SubTask> getAllSubtasksOfEpic(int id);
 
     Status checkStatusEpic(SubTask subTask);
 
