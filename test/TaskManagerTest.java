@@ -14,7 +14,6 @@ import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-
 abstract class TaskManagerTest<T extends TaskManager> {
     protected T taskManager;
     protected HistoryManager historyManager;
@@ -72,15 +71,14 @@ abstract class TaskManagerTest<T extends TaskManager> {
     @Test
     public void shouldGetAllTasks() {
         Task task1 = createTask();
-        Task task2 = new Task("имя задачи", "описание", Status.NEW, LocalDateTime.now().minusHours(5), 3);
-
+        Task task2 = createTask();
         taskManager.addTask(task1);
         taskManager.addTask(task2);
 
         List<Task> tasks = taskManager.getTasks();
         assertEquals(2, tasks.size(), "Неверное количество задач");
         assertTrue(tasks.contains(task1), "Первая задача отсутствует");
-        assertTrue(tasks.contains(task2), "Вторая задача отсутствует");
+        assertTrue(tasks.contains(task2), "вторая задача отсутствует");
     }
 
     @Test

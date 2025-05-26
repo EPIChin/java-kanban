@@ -14,17 +14,17 @@ public class Main {
     public static void main(String[] args) {
         System.out.println("Поехали!");
         InMemoryTaskManager manager = new InMemoryTaskManager();
-        manager.addTask(new Task("починить машину", "важно"));
+        manager.addTask(new Task("починить машину", "важно", Status.IN_PROGRESS, LocalDateTime.now().plusMinutes(300), 5));
         manager.addTask(new Task("починить телефон", " Очень важно", Status.IN_PROGRESS, LocalDateTime.now().plusMinutes(30), 5));
         //manager.addTask(new Task("починить смартфон", " Очень важно", Status.IN_PROGRESS, LocalDateTime.now().plusMinutes(30),5)); // пересечение по времени
 
-        manager.addEpic(new Epic("Уборка!", "пора"));
+        manager.addEpic(new Epic("Уборка!", "пора", Status.IN_PROGRESS, LocalDateTime.now().plusMinutes(10), 5));
         manager.addEpic(new Epic("Учеба", " важно", Status.IN_PROGRESS, LocalDateTime.now().plusMinutes(10), 5));
 
         manager.addSubTask(new SubTask("Уборка в кухне", "помыть посуду", Status.IN_PROGRESS, LocalDateTime.now().plusMinutes(20), 5, 3));
         manager.addSubTask(new SubTask("Уборка на балконе", "Убрать велосипед", Status.IN_PROGRESS, LocalDateTime.now().plusMinutes(100), 5, 3));
 
-        manager.updateTask(new Task(1, "починить телефон", " Очень важно", Status.DONE));
+        manager.updateTask(new Task(1, "починить телефон", " Очень важно", Status.DONE, LocalDateTime.now().plusMinutes(30), 5));
 
         System.out.println(manager.getTasks());
         System.out.println(manager.getEpics());

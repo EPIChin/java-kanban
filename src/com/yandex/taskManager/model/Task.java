@@ -19,11 +19,13 @@ public class Task {
         this.status = Status.NEW;
     }
 
-    public Task(int id, String name, String description, Status status) {
+    public Task(int id, String name, String description, Status status, LocalDateTime startTime, long duration) {
         this.id = id;
         this.name = name;
         this.description = description;
         this.status = status;
+        this.startTime = startTime;
+        this.duration = duration;
     }
 
     public Task(String name, String description, Status status) {
@@ -40,11 +42,18 @@ public class Task {
         this.duration = duration;
     }
 
+    public Task(int id, String name, String description, Status status) {
+        this.id = id;
+        this.name = name;
+        this.description = description;
+        this.status = status;
+    }
+
     public LocalDateTime getEndTime() {
-        if (startTime != null) {
-            return startTime.plusMinutes(duration);
+        if (startTime == null) {
+            throw new IllegalStateException("startTime не может быть null");
         }
-        startTime = LocalDateTime.now();
+
         return startTime.plusMinutes(duration);
     }
 

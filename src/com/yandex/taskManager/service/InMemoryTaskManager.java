@@ -48,15 +48,19 @@ public class InMemoryTaskManager implements TaskManager {
         id++;
         subTask.setId(id);
         epic.setIdSubTasks(id);
-        epics.put(subTask.getEpicId(), epic);
         subTasks.put(id, subTask);
-
-        epic.setStatus(checkStatusEpic(subTask));
-        epic.setStatus(checkStatusEpic(subTask));
-        epic.setId(subTask.getEpicId());
-        updateEpics(epic);
-        updateTimeEpic(epic);
         prioritizedTasks.add(subTask);
+
+        updateEpicFields(epic, subTask);
+    }
+
+    private void updateEpicFields(Epic epic, SubTask subTask) {
+        epic.setStatus(checkStatusEpic(subTask));
+        updateTimeEpic(epic);
+        Task oldTask = getEpicById(epic.getId());
+        prioritizedTasks.remove(oldTask);
+        epics.put(epic.getId(), epic);
+        prioritizedTasks.add(epic);
     }
 
     @Override
@@ -139,13 +143,13 @@ public class InMemoryTaskManager implements TaskManager {
 
     @Override
     public void updateSubTask(SubTask subTask) {
-        Task oldTask = getTaskById(subTask.getId());
-        prioritizedTasks.remove(oldTask);
+        prioritizedTasks.remove(subTask);
         if (subTasks.containsKey(subTask.getId())) {
             subTasks.put(subTask.getId(), subTask);
             updateTimeEpic(epics.get(subTask.getEpicId()));
         } else subTasks.put(id++, subTask);
         prioritizedTasks.add(subTask);
+        updateEpicFields(epics.get(subTask.getEpicId()), subTask);
     }
 
     @Override
@@ -162,9 +166,10 @@ public class InMemoryTaskManager implements TaskManager {
 
     @Override
     public void deleteSubTask(int id) {
-        subTasks.remove(id);
-        updateTimeEpic(epics.get(subTasks.get(id).getEpicId()));
-        prioritizedTasks.remove(subTasks.get(id));
+        SubTask subTask = subTasks.get(id);
+        subTasks.remove(subTask.getId());
+        updateTimeEpic(epics.get(subTasks.get(subTask.getId()).getEpicId()));
+        prioritizedTasks.remove(subTasks.get(subTask.getId()));
     }
 
     @Override
