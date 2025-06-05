@@ -2,119 +2,89 @@ import com.yandex.taskManager.model.Epic;
 import com.yandex.taskManager.model.Status;
 import com.yandex.taskManager.model.SubTask;
 import com.yandex.taskManager.model.Task;
-import com.yandex.taskManager.service.InMemoryTaskManager;
-import com.yandex.taskManager.service.Managers;
+import com.yandex.taskManager.service.HistoryManager;
+import com.yandex.taskManager.service.InMemoryHistoryManager;
 import com.yandex.taskManager.service.TaskManager;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
-import java.util.Collections;
+import java.time.LocalDateTime;
 import java.util.List;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.*;
 
-class TaskManagerTest {
-    protected final TaskManager taskManager = Managers.getDefault();
+abstract class TaskManagerTest<T extends TaskManager> {
+    protected T taskManager;
+    protected HistoryManager historyManager;
 
     protected Task createTask() {
-        return new Task("TaskName", "TaskDescription", Status.NEW);
+        return new Task("имя задачи", "описание", Status.NEW, LocalDateTime.now(), 3);
     }
 
     protected Epic createEpic() {
-        return new Epic("EpicName", "EpicDescription");
+        return new Epic("имя задачи", "описание", Status.NEW, LocalDateTime.now(), 3);
     }
 
     protected SubTask createSubTask(int epicId) {
-        return new SubTask("Прочитать", "Книгу", Status.DONE, epicId);
+        return new SubTask("Прочитать", "Книгу", Status.DONE, LocalDateTime.now(), 5, epicId);
+    }
+
+    protected abstract T createTaskManager();
+
+    @BeforeEach
+    void setUp() {
+        taskManager = createTaskManager();
+        historyManager = new InMemoryHistoryManager();
+
+        assertNotNull(taskManager, "Менеджер задач не был создан");
+    }
+
+    @AfterEach
+    void tearDown() {
+        if (taskManager != null) {
+            taskManager.deleteAll();
+        }
     }
 
     @Test
-    void addNewTask() {
-        Task task = new Task("починть машину", "важно");
-        taskManager.addTask(task);
-        final Task savedTask = taskManager.getTaskById(1);
-        assertNotNull(savedTask, "Задача не найдена.");
-        assertEquals(task, savedTask, "Задачи не совпадают.");
-        final List<Task> tasks = taskManager.getTasks();
-        assertNotNull(tasks, "Задачи не возвращаются.");
-        assertEquals(1, tasks.size(), "Неверное количество задач.");
-        assertEquals(task, tasks.getFirst(), "Задачи не совпадают.");
-    }
-
-    @Test
-    void addNewEpic() {
-        Epic epic = new Epic("Уборка!", "пора");
-        taskManager.addEpic(epic);
-        final Task savedEpic = taskManager.getEpicById(1);
-        assertNotNull(savedEpic, "Задача не найдена.");
-        assertEquals(epic, savedEpic, "Задачи не совпадают.");
-        final List<Epic> epics = taskManager.getEpics();
-        assertNotNull(epics, "Задачи не возвращаются.");
-        assertEquals(1, epics.size(), "Неверное количество задач.");
-        assertEquals(epic, epics.getFirst(), "Задачи не совпадают.");
-    }
-
-    @Test
-    void addNewSubtask() {
-        Epic epic = new Epic("Уборка!", "пора");
-        taskManager.addEpic(epic);
-        SubTask subTask = new SubTask("Уборка в кухне", "помыть посуду", Status.IN_PROGRESS, 1);
-        taskManager.addSubTask(subTask);
-        final Task savedSubTask = taskManager.getSubTaskById(2);
-        assertNotNull(savedSubTask, "Задача не найдена.");
-        assertEquals(subTask, savedSubTask, "Задачи не совпадают.");
-        final List<SubTask> SubTasks = taskManager.getSubTasks();
-        assertNotNull(SubTasks, "Задачи не возвращаются.");
-        assertEquals(1, SubTasks.size(), "Неверное количество задач.");
-        assertEquals(subTask, SubTasks.getFirst(), "Задачи не совпадают.");
-    }
-
-    @Test
-    void utilityClassReturnsInitializedManagers() {
-        TaskManager defaultTaskManager = Managers.getDefault();
-        TaskManager taskManager = new InMemoryTaskManager();
-        Task task = new Task("починть машину", "важно");
-        taskManager.addTask(task);
-        defaultTaskManager.addTask(task);
-        final Task savedTask1 = taskManager.getTaskById(0);
-        final Task savedTaskDefault = defaultTaskManager.getTaskById(0);
-        assertEquals(savedTask1, savedTaskDefault, "Задачи не совпадают.");
-    }
-
-    @Test
-    public void updateTaskStatusToInProgress() {
+    public void shouldUpdateTask() {
         Task task = createTask();
+        taskManager.addTask(task);
+
         task.setStatus(Status.IN_PROGRESS);
         taskManager.updateTask(task);
-        assertEquals(Status.IN_PROGRESS, taskManager.getTaskById(task.getId()).getStatus());
+
+        Task updatedTask = taskManager.getTaskById(task.getId());
+        assertEquals(Status.IN_PROGRESS, updatedTask.getStatus());
     }
 
     @Test
-    public void updateEpicStatusProgress() {
-        Epic epic = createEpic();
-        epic.setStatus(Status.IN_PROGRESS);
-        taskManager.updateTask(epic);
-        assertEquals(Status.IN_PROGRESS, taskManager.getTaskById(epic.getId()).getStatus());
-    }
-
-    @Test
-    public void deleteAll() {
+    public void shouldDeleteTask() {
         Task task = createTask();
-        Epic epic = createEpic();
-        SubTask subTask = createSubTask(2);
         taskManager.addTask(task);
-        taskManager.addEpic(epic);
-        taskManager.addSubTask(subTask);
-        taskManager.deleteAll();
-        assertEquals(Collections.emptyList(), taskManager.getTasks());
-        assertEquals(Collections.emptyList(), taskManager.getEpics());
-        assertEquals(Collections.emptyList(), taskManager.getSubTasks());
+
+        taskManager.deleteTask();
+        assertNull(taskManager.getTaskById(task.getId()), "Задача должна быть удалена");
     }
 
     @Test
-    public void deleteTaskById() {
-        Task task = createTask();
-        taskManager.deleteTask(task.getId());
-        assertEquals(Collections.emptyList(), taskManager.getTasks());
+    public void shouldGetAllTasks() {
+        Task task1 = createTask();
+        Task task2 = createTask();
+        taskManager.addTask(task1);
+        taskManager.addTask(task2);
+
+        List<Task> tasks = taskManager.getTasks();
+        assertEquals(2, tasks.size(), "Неверное количество задач");
+        assertTrue(tasks.contains(task1), "Первая задача отсутствует");
+        assertTrue(tasks.contains(task2), "вторая задача отсутствует");
+    }
+
+    @Test
+    public void shouldHandleEmptyList() {
+        assertTrue(taskManager.getTasks().isEmpty(), "Список должен быть пустым");
+        assertTrue(taskManager.getEpics().isEmpty(), "Список эпиков должен быть пустым");
+        assertTrue(taskManager.getSubTasks().isEmpty(), "Список подзадач должен быть пустым");
     }
 }

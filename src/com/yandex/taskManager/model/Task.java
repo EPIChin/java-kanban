@@ -1,5 +1,7 @@
 package com.yandex.taskManager.model;
 
+import java.time.LocalDateTime;
+
 import java.util.Objects;
 
 public class Task {
@@ -7,11 +9,37 @@ public class Task {
     private String name;
     private String description;
     private Status status;
+    protected LocalDateTime startTime;
+    protected long duration = 0;
+
 
     public Task(String name, String description) {
         this.name = name;
         this.description = description;
         this.status = Status.NEW;
+    }
+
+    public Task(int id, String name, String description, Status status, LocalDateTime startTime, long duration) {
+        this.id = id;
+        this.name = name;
+        this.description = description;
+        this.status = status;
+        this.startTime = startTime;
+        this.duration = duration;
+    }
+
+    public Task(String name, String description, Status status) {
+        this.name = name;
+        this.description = description;
+        this.status = status;
+    }
+
+    public Task(String name, String description, Status status, LocalDateTime startTime, long duration) {
+        this.name = name;
+        this.description = description;
+        this.status = status;
+        this.startTime = startTime;
+        this.duration = duration;
     }
 
     public Task(int id, String name, String description, Status status) {
@@ -21,18 +49,22 @@ public class Task {
         this.status = status;
     }
 
-    public Task(String name, String description, Status status) {
-        this.name = name;
-        this.description = description;
-        this.status = status;
+    public LocalDateTime getEndTime() {
+        if (startTime == null) {
+            throw new IllegalStateException("startTime не может быть null");
+        }
+
+        return startTime.plusMinutes(duration);
     }
 
     public String toCsv() {
-        return String.format("%d,TASK,%s,%s,%s",
+        return String.format("%d,TASK,%s,%s,%s,%s,%s",
                 getId(),
                 getName(),
                 getStatus(),
-                getDescription()
+                getDescription(),
+                getStartTime(),
+                getDuration()
         );
     }
 
@@ -42,21 +74,26 @@ public class Task {
             values[i] = values[i].trim().replaceAll("^\"\"", "");
         }
         TaskType type = TaskType.valueOf(values[1]);
+        LocalDateTime startTime = LocalDateTime.parse(values[5]);
+        long duration = Long.parseLong(values[6]);
 
         switch (type) {
             case EPIC:
                 Epic epic = new Epic(
                         values[2],
                         values[4],
-                        Status.valueOf(values[3])
+                        Status.valueOf(values[3]),
+                        startTime,
+                        duration
                 );
                 epic.setId(Integer.parseInt(values[0]));
                 return epic;
             case TASK:
-                Task task = new Task(
-                        values[2],
+                Task task = new Task(values[2],
                         values[4],
-                        Status.valueOf(values[3])
+                        Status.valueOf(values[3]),
+                        startTime,
+                        duration
                 );
                 task.setId(Integer.parseInt(values[0]));
                 return task;
@@ -65,7 +102,9 @@ public class Task {
                         values[2],
                         values[4],
                         Status.valueOf(values[3]),
-                        Integer.parseInt(values[5])
+                        startTime,
+                        duration,
+                        Integer.parseInt(values[7])
                 );
                 subTask.setId(Integer.parseInt(values[0]));
                 return subTask;
@@ -109,12 +148,31 @@ public class Task {
         this.id = id;
     }
 
+    public LocalDateTime getStartTime() {
+        return startTime;
+    }
+
+    public void setStartTime(LocalDateTime startTime) {
+        this.startTime = startTime;
+    }
+
+    public long getDuration() {
+        return duration;
+    }
+
+    public void setDuration(long duration) {
+        this.duration = duration;
+    }
+
     @Override
     public String toString() {
         return "Task{" +
                 "name='" + name + '\'' +
                 ", description='" + description + '\'' +
                 ", status=" + status +
+                ", startTime=" + startTime +
+                ", endTime=" + getEndTime() +
+                ", duration=" + duration +
                 '}';
     }
 
@@ -133,5 +191,4 @@ public class Task {
     public int hashCode() {
         return Objects.hash(name, description, status);
     }
-
 }

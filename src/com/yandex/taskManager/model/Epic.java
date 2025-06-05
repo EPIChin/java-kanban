@@ -1,15 +1,16 @@
 package com.yandex.taskManager.model;
 
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
 public class Epic extends Task {
 
     private List<Integer> idSubTasks = new ArrayList<>();
+    private LocalDateTime endTime;
 
     public List<Integer> getIdSubTasks() {
-        ArrayList<Integer> idSubTasksCopy = new ArrayList<>(idSubTasks);
-        return idSubTasksCopy;
+        return new ArrayList<>(idSubTasks);
     }
 
     public void setIdSubTasks(int idSubTask) {
@@ -24,14 +25,28 @@ public class Epic extends Task {
         super(name, description, status);
     }
 
+    public Epic(String name, String description, Status status, LocalDateTime startTime, long duration) {
+        super(name, description, status, startTime, duration);
+    }
+
+    @Override
+    public LocalDateTime getEndTime() {
+        return endTime;
+    }
+
+    public void setEndTime(LocalDateTime endTime) {
+        this.endTime = endTime;
+    }
+
     @Override
     public String toCsv() {
-        return String.format("%d,EPIC,%s,%s,%s,%s",
+        return String.format("%d,EPIC,%s,%s,%s,%s,%s",
                 getId(),
                 getName(),
                 getStatus(),
                 getDescription(),
-                getIdSubTasks()
+                getStartTime(),
+                getDuration()
         );
     }
 
@@ -47,6 +62,9 @@ public class Epic extends Task {
                 ", name='" + getName() + '\'' +
                 ", description='" + getDescription() + '\'' +
                 ", status=" + getStatus() +
+                ", startTime=" + startTime +
+                ", endTime=" + getEndTime() +
+                ", duration=" + duration +
                 '}';
     }
 }
