@@ -19,7 +19,7 @@ public class Main {
         //manager.addTask(new Task("починить смартфон", " Очень важно", Status.IN_PROGRESS, LocalDateTime.now().plusMinutes(30),5)); // пересечение по времени
 
         manager.addEpic(new Epic("Уборка!", "пора", Status.IN_PROGRESS, LocalDateTime.now().plusMinutes(10), 5));
-        manager.addEpic(new Epic("Учеба", " важно", Status.IN_PROGRESS, LocalDateTime.now().plusMinutes(10), 5));
+        manager.addEpic(new Epic("Учеба", " важно", Status.IN_PROGRESS, LocalDateTime.now().plusMinutes(70), 5));
 
         manager.addSubTask(new SubTask("Уборка в кухне", "помыть посуду", Status.IN_PROGRESS, LocalDateTime.now().plusMinutes(20), 5, 3));
         manager.addSubTask(new SubTask("Уборка на балконе", "Убрать велосипед", Status.IN_PROGRESS, LocalDateTime.now().plusMinutes(100), 5, 3));

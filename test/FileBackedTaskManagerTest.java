@@ -80,7 +80,7 @@ public class FileBackedTaskManagerTest {
         Epic epic = new Epic("Эпик", "Описание эпика", Status.IN_PROGRESS);
         manager.addEpic(epic);
         SubTask subTask = new SubTask("Подзадача", "Описание подзадачи",
-                Status.NEW, LocalDateTime.now(), 5, epic.getId());
+                Status.NEW, LocalDateTime.now().plusDays(1), 5, epic.getId());
         manager.addSubTask(subTask);
 
         FileBackedTaskManager loadedManager = FileBackedTaskManager.loadFromFile(tempFile);
