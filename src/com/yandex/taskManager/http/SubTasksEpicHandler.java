@@ -28,24 +28,18 @@ class SubTasksEpicHandler extends BaseHandler {
                     Task epic = taskManager.getEpicById(id);
                     if (epic != null) {
                         ArrayList<SubTask> subtasks = taskManager.getAllSubtasksOfEpic(epic.getId());
-                        response = gson.toJson(subtasks);
+                        sendJsonResponse(exchange, subtasks, 200);
                     } else {
-                        response = "Эпик не найден";
-                        statusCode = 404;
+                        sendTextResponse(exchange, "Эпик не найден", 404);
                     }
                 } catch (StringIndexOutOfBoundsException e) {
-                    response = "В запросе отсутствует id";
-                    statusCode = 400;
+                    sendTextResponse(exchange, "В запросе отсутствует id", 400);
                 } catch (NumberFormatException e) {
-                    response = "Неверный формат id";
-                    statusCode = 400;
+                    sendTextResponse(exchange, "Неверный формат id", 400);
                 }
             }
         } catch (Exception e) {
-            response = "Произошла ошибка: " + e.getMessage();
-            statusCode = 406;
+            sendTextResponse(exchange, "Произошла ошибка: " + e.getMessage(), 406);
         }
-
-        sendResponse(exchange, response, statusCode);
     }
 }

@@ -18,12 +18,9 @@ class PrioritizedHandler extends BaseHandler {
         String requestMethod = exchange.getRequestMethod();
 
         if ("GET".equals(requestMethod)) {
-            response = gson.toJson(taskManager.getPrioritizedTasks());
+            sendJsonResponse(exchange, taskManager.getPrioritizedTasks(), 200);
         } else {
-            response = "Некорректный запрос";
-            statusCode = 400;
+            sendTextResponse(exchange, "Некорректный запрос", 400);
         }
-
-        sendResponse(exchange, response, statusCode);
     }
 }

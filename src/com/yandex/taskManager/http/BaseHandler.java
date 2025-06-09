@@ -17,9 +17,19 @@ abstract class BaseHandler {
         this.gson = gson;
     }
 
-    protected void sendResponse(HttpExchange exchange, String response, int statusCode) throws IOException {
+    protected void sendTextResponse(HttpExchange exchange, String response, int statusCode) throws IOException {
         byte[] responseBytes = response.getBytes(StandardCharsets.UTF_8);
         exchange.getResponseHeaders().set("Content-Type", "text/plain; charset=utf-8");
+        exchange.sendResponseHeaders(statusCode, responseBytes.length);
+        try (OutputStream os = exchange.getResponseBody()) {
+            os.write(responseBytes);
+        }
+    }
+
+    protected void sendJsonResponse(HttpExchange exchange, Object responseObj, int statusCode) throws IOException {
+        String jsonResponse = gson.toJson(responseObj);
+        byte[] responseBytes = jsonResponse.getBytes(StandardCharsets.UTF_8);
+        exchange.getResponseHeaders().set("Content-Type", "application/json; charset=utf-8");
         exchange.sendResponseHeaders(statusCode, responseBytes.length);
         try (OutputStream os = exchange.getResponseBody()) {
             os.write(responseBytes);

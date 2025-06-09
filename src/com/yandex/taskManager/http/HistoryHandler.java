@@ -22,16 +22,12 @@ class HistoryHandler extends BaseHandler {
         try {
             if ("GET".equals(requestMethod)) {
                 List<Task> history = taskManager.getHistory();
-                response = gson.toJson(history);
+                sendJsonResponse(exchange, history, 200);
             } else {
-                response = "Некорректный запрос";
-                statusCode = 400;
+                sendTextResponse(exchange, "Некорректный запрос", 400);
             }
         } catch (Exception e) {
-            response = "Произошла ошибка: " + e.getMessage();
-            statusCode = 406;
+            sendTextResponse(exchange, "Произошла ошибка: " + e.getMessage(), 406);
         }
-
-        sendResponse(exchange, response, statusCode);
     }
 }

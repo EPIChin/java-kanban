@@ -30,23 +30,21 @@ class SubTaskHandler extends BaseHandler {
                 case "GET" -> {
                     if (query == null) {
                         ArrayList<SubTask> subtasks = taskManager.getSubTasks();
-                        response = gson.toJson(subtasks);
+                        sendJsonResponse(exchange, subtasks, 200);
+                        return;
                     } else {
                         try {
                             int id = Integer.parseInt(query.substring(query.indexOf("?id=") + 4));
                             Task subtask = taskManager.getSubTaskById(id);
                             if (subtask != null) {
-                                response = gson.toJson(subtask);
+                                sendJsonResponse(exchange, subtask, 200);
                             } else {
-                                response = "Подзадача не найдена";
-                                statusCode = 404;
+                                sendTextResponse(exchange, "Подзадача не найдена", 404);
                             }
                         } catch (StringIndexOutOfBoundsException e) {
-                            response = "В запросе отсутствует необходимый параметр id";
-                            statusCode = 400;
+                            sendTextResponse(exchange, "В запросе отсутствует необходимый параметр id", 400);
                         } catch (NumberFormatException e) {
-                            response = "Неверный формат id";
-                            statusCode = 400;
+                            sendTextResponse(exchange, "Неверный формат id", 400);
                         }
                     }
                 }
@@ -56,49 +54,39 @@ class SubTaskHandler extends BaseHandler {
                         SubTask subtask = gson.fromJson(body, SubTask.class);
                         if (!Objects.isNull(subtask.getId())) {
                             taskManager.addSubTask(subtask);
-                            statusCode = 201;
-                            response = "Задача создана";
+                            sendTextResponse(exchange, "Задача создана", 201);
                         } else {
                             taskManager.updateSubTask(subtask);
-                            statusCode = 201;
-                            response = "Задача обновлена";
+                            sendTextResponse(exchange, "Задача обновлена", 201);
                         }
                     } catch (JsonSyntaxException e) {
-                        response = "Неверный формат запроса";
-                        statusCode = 400;
+                        sendTextResponse(exchange, "Неверный формат запроса", 400);
                     } catch (IllegalArgumentException e) {
-                        response = "Ошибка: задача имеет пересечение по времени";
-                        statusCode = 406;
+                        sendTextResponse(exchange, "Ошибка: задача имеет пересечение по времени", 406);
                     }
                 }
                 case "DELETE" -> {
                     if (query == null) {
                         taskManager.deleteAll();
-                        response = "Все подзадачи удалены";
+                        sendTextResponse(exchange, "Все подзадачи удалены", 200);
                     } else {
                         try {
                             int id = Integer.parseInt(query.substring(query.indexOf("?id=") + 4));
                             taskManager.deleteSubTask(id);
-                            response = "Подзадача удалена";
+                            sendTextResponse(exchange, "Подзадача удалена", 200);
                         } catch (StringIndexOutOfBoundsException e) {
-                            response = "В запросе отсутствует необходимый параметр id";
-                            statusCode = 400;
+                            sendTextResponse(exchange, "В запросе отсутствует необходимый параметр id", 400);
                         } catch (NumberFormatException e) {
-                            response = "Неверный формат id";
-                            statusCode = 400;
+                            sendTextResponse(exchange, "Неверный формат id", 400);
                         }
                     }
                 }
                 default -> {
-                    response = "Некорректный запрос";
-                    statusCode = 400;
+                    sendTextResponse(exchange, "Некорректный запрос", 400);
                 }
             }
         } catch (Exception e) {
-            response = "Произошла ошибка: " + e.getMessage();
-            statusCode = 406;
+            sendTextResponse(exchange, "Произошла ошибка: " + e.getMessage(), 406);
         }
-
-        sendResponse(exchange, response, statusCode);
     }
 }

@@ -30,23 +30,21 @@ class EpicHandler extends BaseHandler {
                 case "GET" -> {
                     if (query == null) {
                         ArrayList<Epic> epics = taskManager.getEpics();
-                        response = gson.toJson(epics);
+                        sendJsonResponse(exchange, epics, 200);
+                        return;
                     } else {
                         try {
                             int id = Integer.parseInt(query.substring(query.indexOf("?id=") + 4));
                             Task epic = taskManager.getEpicById(id);
                             if (epic != null) {
-                                response = gson.toJson(epic);
+                                sendJsonResponse(exchange, epic, 200);
                             } else {
-                                response = "Эпик не найден";
-                                statusCode = 404;
+                                sendTextResponse(exchange, "Эпик не найден", 404);
                             }
                         } catch (StringIndexOutOfBoundsException e) {
-                            response = "В запросе отсутствует необходимый параметр id";
-                            statusCode = 400;
+                            sendTextResponse(exchange, "В запросе отсутствует необходимый параметр id", 400);
                         } catch (NumberFormatException e) {
-                            response = "Неверный формат id";
-                            statusCode = 400;
+                            sendTextResponse(exchange, "Неверный формат id", 400);
                         }
                     }
                 }
@@ -56,49 +54,39 @@ class EpicHandler extends BaseHandler {
                         Epic epic = gson.fromJson(body, Epic.class);
                         if (!Objects.isNull(epic.getId())) {
                             taskManager.addEpic(epic);
-                            statusCode = 201;
-                            response = "Эпик создан";
+                            sendTextResponse(exchange, "Эпик создан", 201);
                         } else {
                             taskManager.updateEpics(epic);
-                            statusCode = 201;
-                            response = "Эпик обновлен";
+                            sendTextResponse(exchange, "Эпик обновлен", 201);
                         }
                     } catch (JsonSyntaxException e) {
-                        response = "Неверный формат запроса";
-                        statusCode = 400;
+                        sendTextResponse(exchange, "Неверный формат запроса", 400);
                     } catch (IllegalArgumentException e) {
-                        response = "Ошибка: задача имеет пересечение по времени";
-                        statusCode = 406;
+                        sendTextResponse(exchange, "Ошибка: задача имеет пересечение по времени", 406);
                     }
                 }
                 case "DELETE" -> {
                     if (query == null) {
                         taskManager.deleteAll();
-                        response = "Все эпики удалены";
+                        sendTextResponse(exchange, "Все эпики удалены", 200);
                     } else {
                         try {
                             int id = Integer.parseInt(query.substring(query.indexOf("?id=") + 4));
                             taskManager.deleteEpics(id);
-                            response = "Эпик удален";
+                            sendTextResponse(exchange, "Эпик удален", 200);
                         } catch (StringIndexOutOfBoundsException e) {
-                            response = "В запросе отсутствует необходимый параметр id";
-                            statusCode = 400;
+                            sendTextResponse(exchange, "В запросе отсутствует необходимый параметр id", 400);
                         } catch (NumberFormatException e) {
-                            response = "Неверный формат id";
-                            statusCode = 400;
+                            sendTextResponse(exchange, "Неверный формат id", 400);
                         }
                     }
                 }
                 default -> {
-                    response = "Некорректный запрос";
-                    statusCode = 400;
+                    sendTextResponse(exchange, "Некорректный запрос", 400);
                 }
             }
         } catch (Exception e) {
-            response = "Произошла ошибка: " + e.getMessage();
-            statusCode = 406;
+            sendTextResponse(exchange, "Произошла ошибка: " + e.getMessage(), 406);
         }
-
-        sendResponse(exchange, response, statusCode);
     }
 }
