@@ -2,7 +2,6 @@ package com.yandex.taskManager.http;
 
 import com.google.gson.*;
 import com.sun.net.httpserver.HttpExchange;
-
 import com.sun.net.httpserver.HttpServer;
 import com.yandex.taskManager.model.Epic;
 import com.yandex.taskManager.model.SubTask;
@@ -17,42 +16,99 @@ import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
 public class HttpTaskServer {
     public static final int PORT = 8080;
     private static final String URL = "http://localhost:";
     private final HttpServer httpServer;
+    protected Gson gson;
 
-    Gson gson = new GsonBuilder()
-            .registerTypeAdapter(LocalDateTime.class, new LocalDateTimeAdapter())
-            .create();
-
-    private final TaskManager taskManager;
+    private final TaskHandler taskHandler;
+    private final SubTaskHandler subtaskHandler;
+    private final EpicHandler epicHandler;
+    private final HistoryHandler historyHandler;
+    private final SubTasksEpicHandler subtasksEpicHandler;
+    private final PrioritizedHandler prioritizedHandler;
 
     public HttpTaskServer(TaskManager managers) throws IOException {
-        //taskManager = FileBackedTaskManager.loadFromFile(new File("data"));
-        taskManager = managers;
+        TaskManager taskManager = managers;
+        gson = new GsonBuilder()
+                .registerTypeAdapter(LocalDateTime.class, new LocalDateTimeAdapter())
+                .create();
+
+        taskHandler = new TaskHandler(taskManager, gson);
+        subtaskHandler = new SubTaskHandler(taskManager, gson);
+        epicHandler = new EpicHandler(taskManager, gson);
+        historyHandler = new HistoryHandler(taskManager, gson);
+        subtasksEpicHandler = new SubTasksEpicHandler(taskManager, gson);
+        prioritizedHandler = new PrioritizedHandler(taskManager, gson);
+
         httpServer = HttpServer.create();
         httpServer.bind(new InetSocketAddress(PORT), 0);
 
-        httpServer.createContext("/task", this::taskHandler);
-        httpServer.createContext("/subtask", this::subtaskHandler);
-        httpServer.createContext("/epic", this::epicHandler);
-        httpServer.createContext("/history", this::historyHandler);
-        httpServer.createContext("/subtask/epic", this::subtasksEpicHandler);
-        httpServer.createContext("/prioritized", this::prioritizedHandler);
+        httpServer.createContext("/task", taskHandler::handleRequest);
+        httpServer.createContext("/subtask", subtaskHandler::handleRequest);
+        httpServer.createContext("/epic", epicHandler::handleRequest);
+        httpServer.createContext("/history", historyHandler::handleRequest);
+        httpServer.createContext("/subtask/epic", subtasksEpicHandler::handleRequest);
+        httpServer.createContext("/prioritized", prioritizedHandler::handleRequest);
     }
 
-    private void sendResponse(HttpExchange exchange, String response, int statusCode) throws IOException {
+    public void start() {
+        System.out.println("Стартуем сервер на порту " + PORT);
+        System.out.println(URL + PORT);
+        httpServer.start();
+    }
+
+    public void stop() {
+        httpServer.stop(0);
+        System.out.println("Остановили сервер на порту " + PORT);
+    }
+
+    public static class LocalDateTimeAdapter implements JsonSerializer<LocalDateTime>, JsonDeserializer<LocalDateTime> {
+        private static final DateTimeFormatter formatter = DateTimeFormatter.ISO_LOCAL_DATE_TIME;
+
+        @Override
+        public JsonElement serialize(LocalDateTime src, Type typeOfSrc, JsonSerializationContext context) {
+            return new JsonPrimitive(src.format(formatter));
+        }
+
+        @Override
+        public LocalDateTime deserialize(JsonElement json, Type typeOfT, JsonDeserializationContext context) throws JsonParseException {
+            return LocalDateTime.parse(json.getAsString(), formatter);
+        }
+    }
+}
+
+abstract class BaseHandler {
+    protected final TaskManager taskManager;
+    protected final Gson gson;
+
+    public BaseHandler(TaskManager taskManager, Gson gson) {
+        this.taskManager = taskManager;
+        this.gson = gson;
+    }
+
+    protected void sendResponse(HttpExchange exchange, String response, int statusCode) throws IOException {
         byte[] responseBytes = response.getBytes(StandardCharsets.UTF_8);
-        exchange.getResponseHeaders().set("Content-Type", "application/json; charset=utf-8");
+        exchange.getResponseHeaders().set("Content-Type", "text/plain; charset=utf-8");
         exchange.sendResponseHeaders(statusCode, responseBytes.length);
         try (OutputStream os = exchange.getResponseBody()) {
             os.write(responseBytes);
         }
     }
 
-    private void taskHandler(HttpExchange exchange) throws IOException {
+    protected abstract void handleRequest(HttpExchange exchange) throws IOException;
+}
+
+class TaskHandler extends BaseHandler {
+    public TaskHandler(TaskManager taskManager, Gson gson) {
+        super(taskManager, gson);
+    }
+
+    @Override
+    protected void handleRequest(HttpExchange exchange) throws IOException {
         String response = "";
         int statusCode = 200;
         String requestMethod = exchange.getRequestMethod();
@@ -87,12 +143,21 @@ public class HttpTaskServer {
                     try (InputStream inputStream = exchange.getRequestBody()) {
                         String body = new String(inputStream.readAllBytes(), StandardCharsets.UTF_8);
                         Task task = gson.fromJson(body, Task.class);
-                        taskManager.addTask(task);
-                        statusCode = 201;
-                        response = "Задача создана";
+                        if (!Objects.isNull(task.getId())) {
+                            taskManager.addTask(task);
+                            statusCode = 201;
+                            response = "Задача создана";
+                        } else {
+                            taskManager.updateTask(task);
+                            statusCode = 201;
+                            response = "Задача обновлена";
+                        }
                     } catch (JsonSyntaxException e) {
                         response = "Неверный формат запроса";
                         statusCode = 400;
+                    } catch (IllegalArgumentException e) {
+                        response = "Ошибка: задача имеет пересечение по времени";
+                        statusCode = 406;
                     }
                 }
                 case "DELETE" -> {
@@ -125,8 +190,15 @@ public class HttpTaskServer {
 
         sendResponse(exchange, response, statusCode);
     }
+}
 
-    private void subtaskHandler(HttpExchange exchange) throws IOException {
+class SubTaskHandler extends BaseHandler {
+    public SubTaskHandler(TaskManager taskManager, Gson gson) {
+        super(taskManager, gson);
+    }
+
+    @Override
+    protected void handleRequest(HttpExchange exchange) throws IOException {
         String response = "";
         int statusCode = 200;
         String requestMethod = exchange.getRequestMethod();
@@ -161,12 +233,21 @@ public class HttpTaskServer {
                     try (InputStream inputStream = exchange.getRequestBody()) {
                         String body = new String(inputStream.readAllBytes(), StandardCharsets.UTF_8);
                         SubTask subtask = gson.fromJson(body, SubTask.class);
-                        taskManager.addSubTask(subtask);
-                        statusCode = 201;
-                        response = "Подзадача создана";
+                        if (!Objects.isNull(subtask.getId())) {
+                            taskManager.addSubTask(subtask);
+                            statusCode = 201;
+                            response = "Задача создана";
+                        } else {
+                            taskManager.updateSubTask(subtask);
+                            statusCode = 201;
+                            response = "Задача обновлена";
+                        }
                     } catch (JsonSyntaxException e) {
                         response = "Неверный формат запроса";
                         statusCode = 400;
+                    } catch (IllegalArgumentException e) {
+                        response = "Ошибка: задача имеет пересечение по времени";
+                        statusCode = 406;
                     }
                 }
                 case "DELETE" -> {
@@ -199,8 +280,15 @@ public class HttpTaskServer {
 
         sendResponse(exchange, response, statusCode);
     }
+}
 
-    private void epicHandler(HttpExchange exchange) throws IOException {
+class EpicHandler extends BaseHandler {
+    public EpicHandler(TaskManager taskManager, Gson gson) {
+        super(taskManager, gson);
+    }
+
+    @Override
+    protected void handleRequest(HttpExchange exchange) throws IOException {
         String response = "";
         int statusCode = 200;
         String requestMethod = exchange.getRequestMethod();
@@ -235,12 +323,21 @@ public class HttpTaskServer {
                     try (InputStream inputStream = exchange.getRequestBody()) {
                         String body = new String(inputStream.readAllBytes(), StandardCharsets.UTF_8);
                         Epic epic = gson.fromJson(body, Epic.class);
-                        taskManager.addEpic(epic);
-                        statusCode = 201;
-                        response = "Эпик создан";
+                        if (!Objects.isNull(epic.getId())) {
+                            taskManager.addEpic(epic);
+                            statusCode = 201;
+                            response = "Эпик создан";
+                        } else {
+                            taskManager.updateEpics(epic);
+                            statusCode = 201;
+                            response = "Эпик обновлен";
+                        }
                     } catch (JsonSyntaxException e) {
                         response = "Неверный формат запроса";
                         statusCode = 400;
+                    } catch (IllegalArgumentException e) {
+                        response = "Ошибка: задача имеет пересечение по времени";
+                        statusCode = 406;
                     }
                 }
                 case "DELETE" -> {
@@ -273,8 +370,15 @@ public class HttpTaskServer {
 
         sendResponse(exchange, response, statusCode);
     }
+}
 
-    private void historyHandler(HttpExchange exchange) throws IOException {
+class HistoryHandler extends BaseHandler {
+    public HistoryHandler(TaskManager taskManager, Gson gson) {
+        super(taskManager, gson);
+    }
+
+    @Override
+    protected void handleRequest(HttpExchange exchange) throws IOException {
         String response = "";
         int statusCode = 200;
         String requestMethod = exchange.getRequestMethod();
@@ -294,8 +398,15 @@ public class HttpTaskServer {
 
         sendResponse(exchange, response, statusCode);
     }
+}
 
-    private void subtasksEpicHandler(HttpExchange exchange) throws IOException {
+class SubTasksEpicHandler extends BaseHandler {
+    public SubTasksEpicHandler(TaskManager taskManager, Gson gson) {
+        super(taskManager, gson);
+    }
+
+    @Override
+    protected void handleRequest(HttpExchange exchange) throws IOException {
         String response = "";
         int statusCode = 200;
         String requestMethod = exchange.getRequestMethod();
@@ -328,47 +439,27 @@ public class HttpTaskServer {
 
         sendResponse(exchange, response, statusCode);
     }
+}
 
-    private void prioritizedHandler(HttpExchange exchange) throws IOException {
+class PrioritizedHandler extends BaseHandler {
+    public PrioritizedHandler(TaskManager taskManager, Gson gson) {
+        super(taskManager, gson);
+    }
+
+    @Override
+    protected void handleRequest(HttpExchange exchange) throws IOException {
         String response = "";
         int statusCode = 200;
         String requestMethod = exchange.getRequestMethod();
 
-        try {
-            if ("GET".equals(requestMethod)) {
-                response = gson.toJson(taskManager.getPrioritizedTasks());
-            } else {
-                response = "Некорректный запрос";
-                statusCode = 400;
-            }
-            sendResponse(exchange, response, statusCode);
-        } catch (IOException e) {
-            throw new RuntimeException(e);
-        }
-    }
-
-    public void start() {
-        System.out.println("Стартуем сервер на порту " + PORT);
-        System.out.println(URL + PORT);
-        httpServer.start();
-    }
-
-    public void stop() {
-        httpServer.stop(0);
-        System.out.println("Остановили сервер на порту " + PORT);
-    }
-
-    public static class LocalDateTimeAdapter implements JsonSerializer<LocalDateTime>, JsonDeserializer<LocalDateTime> {
-        private static final DateTimeFormatter formatter = DateTimeFormatter.ISO_LOCAL_DATE_TIME;
-
-        @Override
-        public JsonElement serialize(LocalDateTime src, Type typeOfSrc, JsonSerializationContext context) {
-            return new JsonPrimitive(src.format(formatter));
+        if ("GET".equals(requestMethod)) {
+            response = gson.toJson(taskManager.getPrioritizedTasks());
+        } else {
+            response = "Некорректный запрос";
+            statusCode = 400;
         }
 
-        @Override
-        public LocalDateTime deserialize(JsonElement json, Type typeOfT, JsonDeserializationContext context) throws JsonParseException {
-            return LocalDateTime.parse(json.getAsString(), formatter);
-        }
+        sendResponse(exchange, response, statusCode);
     }
 }
+

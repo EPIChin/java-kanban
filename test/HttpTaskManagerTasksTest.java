@@ -200,7 +200,7 @@ public class HttpTaskManagerTasksTest {
     @Test
     public void testGetAllEpics() throws IOException, InterruptedException {
         Epic epic1 = new Epic("Уборка!", "пора", Status.IN_PROGRESS, LocalDateTime.now().plusMinutes(40), 5);
-        Epic epic2 = new Epic("Уборка!", "пора", Status.IN_PROGRESS, LocalDateTime.now().plusMinutes(50), 5);
+        Epic epic2 = new Epic("Уборка!2", "пора2", Status.IN_PROGRESS, LocalDateTime.now().plusMinutes(50), 5);
 
         manager.addEpic(epic1);
         manager.addEpic(epic2);
