@@ -18,7 +18,7 @@ class InMemoryTaskManagerTest extends TaskManagerTest<InMemoryTaskManager> {
     protected final TaskManager taskManager = Managers.getDefault();
 
     protected Task createTask() {
-        return new Task("TaskName", "TaskDescription", Status.NEW);
+        return new Task("починить машину", "важно", Status.IN_PROGRESS, LocalDateTime.now().plusMinutes(300), 5);
     }
 
     protected Epic createEpic() {
@@ -26,7 +26,7 @@ class InMemoryTaskManagerTest extends TaskManagerTest<InMemoryTaskManager> {
     }
 
     protected SubTask createSubTask(int epicId) {
-        return new SubTask("Прочитать", "Книгу", Status.DONE, LocalDateTime.now(), 5, epicId);
+        return new SubTask("Прочитать", "Книгу", Status.DONE, LocalDateTime.now().plusMinutes(70), 5, epicId);
     }
 
     @Test
