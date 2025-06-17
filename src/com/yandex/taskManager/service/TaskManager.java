@@ -7,6 +7,7 @@ import com.yandex.taskManager.model.Task;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
 
 public interface TaskManager {
 
@@ -53,4 +54,8 @@ public interface TaskManager {
     void deleteAll();
 
     List<Task> getHistory();
+
+    Set<Task> getPrioritizedTasks();
+
+
 }
